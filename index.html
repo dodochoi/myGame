@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>찐텐 MBTI 테스트 - 최성민이 준비한</title>
+<style>
+  :root{
+    --bg: #16101f;
+    --bg2: #201730;
+    --pink: #ff2d78;
+    --lime: #d4ff3d;
+    --cyan: #3dffea;
+    --cream: #fff8f0;
+    --card: #241a35;
+    --muted: #a996c2;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(255,45,120,0.25), transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(61,255,234,0.18), transparent 45%),
+      var(--bg);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    color: var(--cream);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px 16px;
+  }
+  .stage{
+    width:100%;
+    max-width:520px;
+  }
+  /* Screens */
+  .screen{ display:none; }
+  .screen.active{ display:block; animation: pop .45s cubic-bezier(.2,.9,.25,1); }
+  @keyframes pop{
+    from{ opacity:0; transform: translateY(18px) scale(.97); }
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  /* Sticker badge */
+  .badge{
+    display:inline-block;
+    background: var(--lime);
+    color:#16101f;
+    font-weight:800;
+    font-size:12px;
+    letter-spacing:.5px;
+    padding:6px 12px;
+    border-radius:999px;
+    transform: rotate(-3deg);
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.35);
+  }
+
+  /* Intro */
+  .intro-card{
+    background: var(--card);
+    border-radius:28px;
+    padding:40px 28px 32px;
+    text-align:center;
+    border:1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+  .intro-emoji{
+    font-size:56px;
+    display:inline-block;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float{
+    0%,100%{ transform: translateY(0) rotate(-4deg); }
+    50%{ transform: translateY(-10px) rotate(4deg); }
+  }
+  h1.title{
+    font-size: clamp(28px,7vw,38px);
+    line-height:1.15;
+    margin: 18px 0 8px;
+    font-weight:900;
+    background: linear-gradient(90deg, var(--pink), var(--cyan));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    letter-spacing:-0.5px;
+  }
+  .subtitle{
+    color: var(--muted);
+    font-size:15px;
+    margin:0 0 24px;
+    line-height:1.5;
+  }
+  .meta-row{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:28px;
+  }
+  .chip{
+    font-size:12px;
+    padding:5px 10px;
+    border-radius:999px;
+    background: rgba(255,255,255,0.06);
+    color: var(--cream);
+    border:1px solid rgba(255,255,255,0.1);
+  }
+  button.cta{
+    width:100%;
+    border:none;
+    cursor:pointer;
+    background: var(--pink);
+    color: #fff;
+    font-weight:800;
+    font-size:17px;
+    padding:16px 20px;
+    border-radius:18px;
+    box-shadow: 0 8px 0 #a4104c, 0 12px 30px rgba(255,45,120,0.35);
+    transition: transform .12s ease;
+  }
+  button.cta:active{
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 #a4104c, 0 4px 14px rgba(255,45,120,0.3);
+  }
+  button.cta.secondary{
+    background: var(--cyan);
+    color:#16101f;
+    box-shadow: 0 8px 0 #1a9a8c, 0 12px 30px rgba(61,255,234,0.25);
+  }
+  button.cta.secondary:active{ box-shadow: 0 2px 0 #1a9a8c, 0 4px 14px rgba(61,255,234,0.2); }
+
+  /* Quiz */
+  .quiz-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+    font-size:13px;
+    color:var(--muted);
+    font-weight:700;
+  }
+  .progress-track{
+    width:100%;
+    height:14px;
+    border-radius:999px;
+    background: rgba(255,255,255,0.08);
+    overflow:hidden;
+    margin-bottom:26px;
+    position:relative;
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    border-radius:999px;
+    background: linear-gradient(90deg, var(--pink), var(--lime));
+    transition: width .5s cubic-bezier(.3,.8,.3,1);
+  }
+  .q-card{
+    background: var(--card);
+    border-radius:26px;
+    padding:30px 24px;
+    border:1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+  .q-eyebrow{
+    font-size:12px;
+    font-weight:800;
+    color: var(--lime);
+    letter-spacing:1px;
+    margin-bottom:10px;
+  }
+  .q-text{
+    font-size: clamp(19px,5vw,23px);
+    font-weight:800;
+    line-height:1.4;
+    margin-bottom:26px;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .option{
+    text-align:left;
+    background: rgba(255,255,255,0.04);
+    border:2px solid rgba(255,255,255,0.09);
+    color: var(--cream);
+    padding:16px 18px;
+    border-radius:16px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition: all .15s ease;
+    line-height:1.45;
+  }
+  .option:hover{
+    border-color: var(--pink);
+    background: rgba(255,45,120,0.1);
+    transform: translateX(3px);
+  }
+  .option:active{ transform: scale(.98); }
+  .option.picked{
+    border-color: var(--lime);
+    background: rgba(212,255,61,0.12);
+  }
+  .option .opt-tag{
+    display:inline-block;
+    font-size:11px;
+    font-weight:800;
+    color: var(--pink);
+    margin-right:8px;
+  }
+
+  .back-link{
+    display:inline-block;
+    margin-top:16px;
+    color: var(--muted);
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+    background:none;
+    border:none;
+  }
+
+  /* Result */
+  .result-hero{
+    background: var(--card);
+    border-radius:28px;
+    padding:36px 26px 28px;
+    text-align:center;
+    border:1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    position:relative;
+    overflow:hidden;
+  }
+  .confetti{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+  }
+  .result-type{
+    font-size: clamp(46px,14vw,64px);
+    font-weight:900;
+    letter-spacing:2px;
+    background: linear-gradient(90deg, var(--lime), var(--cyan));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin:6px 0 2px;
+  }
+  .result-nick{
+    font-size: clamp(20px,5.5vw,26px);
+    font-weight:800;
+    color: var(--cream);
+    margin-bottom:14px;
+  }
+  .result-desc{
+    color: var(--muted);
+    font-size:14.5px;
+    line-height:1.7;
+    text-align:left;
+    background: rgba(255,255,255,0.04);
+    padding:18px 18px;
+    border-radius:16px;
+    margin: 18px 0;
+  }
+  .trait-bars{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin: 20px 0 8px;
+    text-align:left;
+  }
+  .trait-row{ font-size:12px; font-weight:700; color:var(--muted); }
+  .trait-labels{ display:flex; justify-content:space-between; margin-bottom:6px; }
+  .trait-track{
+    height:10px;
+    border-radius:999px;
+    background: rgba(255,255,255,0.08);
+    overflow:hidden;
+  }
+  .trait-fill{
+    height:100%;
+    background: linear-gradient(90deg, var(--pink), var(--cyan));
+    border-radius:999px;
+    transition: width .8s cubic-bezier(.3,.8,.3,1);
+    width:0%;
+  }
+  .keyword-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin: 18px 0 6px;
+  }
+  .cta-row{
+    display:flex;
+    gap:10px;
+    margin-top:22px;
+  }
+  .cta-row button{ flex:1; }
+  footer.note{
+    text-align:center;
+    color: var(--muted);
+    font-size:11.5px;
+    margin-top:18px;
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- INTRO -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro-card">
+      <span class="intro-emoji">🫧</span>
+      <h1 class="title">찐텐 MBTI<br/>테스트</h1>
+      <p class="subtitle">12문제로 알아보는 나의 찐텐 유형<br/>진지하게 하지 말고 그냥 끌리는 대로 눌러</p>
+      <div class="meta-row">
+        <span class="chip">⏱️ 1분 30초</span>
+        <span class="chip">🔥 오늘 참여자 폭발중</span>
+        <span class="chip">📱 반응형</span>
+      </div>
+      <button class="cta" onclick="startQuiz()">테스트 시작 ✨</button>
+    </div>
+    <footer class="note">최성민이 준비한 테스트 · 재미로 보는 결과예요, 너무 진지하게 받아들이지 마세요 :)</footer>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-top">
+      <span id="q-counter">Q1 / 12</span>
+      <span id="q-vibe">🎯 찐텐 측정중</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="q-card">
+      <div class="q-eyebrow" id="q-axis-label">E / I</div>
+      <div class="q-text" id="q-text">질문 텍스트</div>
+      <div class="options" id="q-options"></div>
+    </div>
+    <button class="back-link" id="back-btn" onclick="goBack()">← 이전 질문으로</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result">
+    <div class="result-hero">
+      <span class="badge">RESULT</span>
+      <div class="result-type" id="result-type">ENFP</div>
+      <div class="result-nick" id="result-nick">— 파티의 중심 —</div>
+
+      <div class="keyword-row" id="result-keywords"></div>
+
+      <div class="result-desc" id="result-desc"></div>
+
+      <div class="trait-bars" id="trait-bars"></div>
+
+      <div class="cta-row">
+        <button class="cta secondary" onclick="restartQuiz()">다시하기 🔁</button>
+        <button class="cta" onclick="shareResult()">결과 공유 📋</button>
+      </div>
+    </div>
+    <footer class="note">MZ식 찐텐 MBTI · 결과는 재미 참고용입니다</footer>
+  </div>
+
+</div>
+
+<script>
+// ---------------- DATA ----------------
+const questions = [
+  {
+    axis: "E / I",
+    text: "단톡방에 '이번 주말 뭐하지?' 라는 말 나오면 나는?",
+    options: [
+      { label: "바로 \"나 나 나!! 모임 언제 어디서\" 댓글 폭격", type: "E" },
+      { label: "일단 조용히 읽고 상황 봐서 나중에 답장", type: "I" },
+    ]
+  },
+  {
+    axis: "E / I",
+    text: "친구 생일파티, 새로운 사람들이 반이다. 나는?",
+    options: [
+      { label: "처음 보는 사람이랑도 5분만에 급친해짐", type: "E" },
+      { label: "아는 사람 옆에 딱 붙어서 텐션 서서히 올림", type: "I" },
+    ]
+  },
+  {
+    axis: "E / I",
+    text: "3일 연속 약속 잡히면 내 배터리 상태는?",
+    options: [
+      { label: "오히려 좋아 에너지 풀충전 상태 🔋", type: "E" },
+      { label: "하루는 진짜 집에서 숨만 쉬어야함", type: "I" },
+    ]
+  },
+  {
+    axis: "S / N",
+    text: "여행 계획 짤 때 나는 어느 쪽?",
+    options: [
+      { label: "시간별 동선, 맛집, 예약 다 엑셀로 정리함", type: "S" },
+      { label: "일단 비행기표만 끊고 가서 느낌대로 감", type: "N" },
+    ]
+  },
+  {
+    axis: "S / N",
+    text: "친구가 고민 상담하면 나의 리액션은?",
+    options: [
+      { label: "\"그래서 정확히 무슨 일 있었는데\" 팩트 정리부터", type: "S" },
+      { label: "\"그니까 결국 네가 원하는 삶의 방향이 뭐야\" 질문 던짐", type: "N" },
+    ]
+  },
+  {
+    axis: "S / N",
+    text: "새로운 카페 발견했을 때 나의 반응?",
+    options: [
+      { label: "\"여기 시그니처 뭐임, 웨이팅 얼마나됨\" 실용 정보 탐색", type: "S" },
+      { label: "\"여기 컨셉 미쳤다 대체 사장님 무슨 생각으로 만드셨지\" 상상의 나래", type: "N" },
+    ]
+  },
+  {
+    axis: "T / F",
+    text: "친구가 \"나 이 옷 어때?\" 물어보는데 별로다. 나는?",
+    options: [
+      { label: "\"음... 색감은 별론데 핏은 괜찮아\" 솔직 피드백", type: "T" },
+      { label: "\"오 느낌 있다ㅎㅎ 근데 이것도 한번 입어볼래?\" 돌려말함", type: "F" },
+    ]
+  },
+  {
+    axis: "T / F",
+    text: "팀플에서 의견 충돌났을 때 나는?",
+    options: [
+      { label: "논리랑 근거로 어떤 게 더 효율적인지 정리해서 제시", type: "T" },
+      { label: "다들 기분 안 상하게 분위기부터 조율", type: "F" },
+    ]
+  },
+  {
+    axis: "T / F",
+    text: "슬픈 영화 보고 우는 친구를 보면 나는?",
+    options: [
+      { label: "\"근데 그 상황이면 저렇게 안하지 않나\" 냉정 분석", type: "T" },
+      { label: "같이 훌쩍이면서 티슈 건네줌", type: "F" },
+    ]
+  },
+  {
+    axis: "J / P",
+    text: "내일 중요한 약속 있으면 오늘 밤 나는?",
+    options: [
+      { label: "옷, 준비물, 동선 다 미리 세팅해두고 잠", type: "J" },
+      { label: "\"내일 아침에 일어나서 생각하지 뭐\" 하고 잠", type: "P" },
+    ]
+  },
+  {
+    axis: "J / P",
+    text: "여행 마지막날, 짐 싸는 타이밍은?",
+    options: [
+      { label: "전날 밤에 미리 다 싸놓고 편하게 잠", type: "J" },
+      { label: "체크아웃 30분 전에 미친듯이 쑤셔넣기", type: "P" },
+    ]
+  },
+  {
+    axis: "J / P",
+    text: "캘린더 앱을 여는 나의 상태는?",
+    options: [
+      { label: "이번 달 스케줄이 색깔별로 칼같이 정리되어있음", type: "J" },
+      { label: "이번 달 텅 비어있다가 당일 아침에 갑자기 일정 생김", type: "P" },
+    ]
+  },
+];
+
+const resultData = {
+  ENFP: { nick: "인싸력 만렙 자유영혼", keywords:["즉흥의 신","텐션 담당","아이디어 뱅크"],
+    desc:"어디서든 분위기 메이커 역할을 자처하는 타입. 계획보다 '일단 해보고 생각하자'가 삶의 모토고, 새로운 사람 새로운 자극에 눈이 반짝거림. 다만 하나에 꽂히면 오래 못 가는 게 함정 ㅎㅎ" },
+  ENFJ: { nick: "우리 반 인기짱 리더", keywords:["오지랖 대마왕","분위기 조율러","공감왕"],
+    desc:"주변 사람들 감정 챙기느라 정작 본인 마음은 뒷전일 때가 많은 타입. 단톡방에서 싸움 나면 중재하는 것도 항상 내 몫. 사람들이 잘 되는 걸 보면 진심으로 뿌듯함." },
+  ENTP: { nick: "논쟁 즐기는 아이디어 뱅크", keywords:["악마의 대변인","호기심 폭발","말빨 만렙"],
+    desc:"토론만 시작되면 눈빛 달라지는 타입. \"근데 반대로 생각하면?\" 이 입버릇. 새로운 걸 배우는 속도는 빠른데 루틴한 반복 작업은 극혐함." },
+  ENTJ: { nick: "타고난 프로 조직러", keywords:["효율충","목표지향","추진력 갑"],
+    desc:"팀플 조장은 항상 내 담당. 비효율적인 걸 보면 못 참고 바로 개선안 제시함. 목표가 생기면 관련 정보 다 조사해서 최적 루트로 밀어붙이는 스타일." },
+  ESFP: { nick: "분위기 그 자체 파티피플", keywords:["에너자이저","리액션 장인","현재를 삶"],
+    desc:"모임에 있으면 자동으로 텐션이 올라가는 타입. 계획 세우는 것보다 지금 이 순간 재밌는 게 최우선. 사진첩에 친구들이랑 찍은 사진이 8할." },
+  ESFJ: { nick: "우리 모임 총무님", keywords:["살림꾼","의리파","분위기 메이커"],
+    desc:"단톡방 생일 챙기기, 회비 정리, 다 내 담당. 사람들 사이에서 조화를 중요하게 생각하고 다같이 즐거운 게 최고의 행복." },
+  ESTP: { nick: "행동파 즉흥 실행러", keywords:["일단 GO","현실주의","텐션 최고"],
+    desc:"고민하는 시간에 이미 실행하고 있는 타입. 위험해 보여도 일단 부딪혀보고 그 다음 생각함. 몸으로 부딪히는 액티비티는 다 좋아함." },
+  ESTJ: { nick: "완벽 계획 실행자", keywords:["원칙주의","계획왕","리더십"],
+    desc:"규칙과 순서를 중요하게 생각하고 맡은 일은 확실하게 처리함. 단체 여행 가면 이미 시간표 다 짜놓은 사람이 바로 나." },
+  INFP: { nick: "감성 충만 몽상가", keywords:["감성 폭발","공감왕","자아성찰러"],
+    desc:"혼자 있는 시간에 온갖 생각의 소용돌이에 빠지는 타입. 좋아하는 거 앞에서는 누구보다 진심이고, 상처받으면 오래 담아두는 편." },
+  INFJ: { nick: "속 깊은 관찰형 조언가", keywords:["통찰력","깊은 우물","완벽주의"],
+    desc:"겉으론 조용해보여도 머릿속은 늘 복잡한 생각으로 가득. 사람들 심리 파악은 기가막히게 잘하는데 정작 본인 얘기는 잘 안함." },
+  INTP: { nick: "논리 탐구하는 철학자", keywords:["궁금증 폭발","분석왕","은근 4차원"],
+    desc:"궁금한 게 생기면 밤새 파고드는 타입. 효율 없는 스몰토크는 딱 질색이지만 관심사 얘기 시작하면 텐션 급상승함." },
+  INTJ: { nick: "전략적 완벽주의자", keywords:["장기전략가","효율 집착","독립적"],
+    desc:"머릿속에 이미 5단계 플랜이 짜여있는 타입. 감정 소모하는 관계보다 명확한 목표와 결과가 훨씬 편함." },
+  ISFP: { nick: "자유로운 감성 아티스트", keywords:["평화주의","취향 확고","은근 고집"],
+    desc:"눈에 띄는 거 별로 안 좋아하지만 자기 취향은 확실한 타입. 억지로 뭐 하는 거 싫어하고 자기만의 페이스가 제일 중요함." },
+  ISFJ: { nick: "다정한 뒷바라지 요정", keywords:["세심함","배려왕","묵묵한 실행"],
+    desc:"티 안 내고 주변 사람들 잘 챙기는 타입. 부탁받으면 거절 잘 못하고 혼자 다 떠안는 경우 많음. 소소한 루틴에서 안정감을 느낌." },
+  ISTP: { nick: "쿨内 무심한 해결사", keywords:["쿨뷰티","실전형","무심한 다정함"],
+    desc:"말은 별로 없어도 문제 생기면 조용히 나서서 해결하는 타입. 감정 소모하는 갈등 상황은 극혐, 손으로 뭔가 만들거나 고치는 거 좋아함." },
+  ISTJ: { nick: "믿고 맡기는 원칙주의자", keywords:["신뢰의 아이콘","루틴 사랑","책임감 갑"],
+    desc:"한번 맡은 일은 끝까지 책임지는 타입. 갑작스런 변화보다는 검증된 방식이 편하고, 약속 시간에 늦는 걸 세상에서 제일 싫어함." },
+};
+
+const traitLabels = {
+  EI: ["E 외향", "I 내향"],
+  SN: ["S 감각", "N 직관"],
+  TF: ["T 사고", "F 감정"],
+  JP: ["J 판단", "P 인식"],
+};
+
+// ---------------- STATE ----------------
+let current = 0;
+let answers = []; // {type: 'E'|'I'|...}
+
+const screens = {
+  intro: document.getElementById('screen-intro'),
+  quiz: document.getElementById('screen-quiz'),
+  result: document.getElementById('screen-result'),
+};
+
+function showScreen(name){
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[name].classList.add('active');
+}
+
+function startQuiz(){
+  current = 0;
+  answers = [];
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = questions[current];
+  document.getElementById('q-counter').textContent = `Q${current+1} / ${questions.length}`;
+  document.getElementById('q-axis-label').textContent = q.axis + ' 축 질문';
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('progress-fill').style.width = `${(current/questions.length)*100}%`;
+  document.getElementById('back-btn').style.visibility = current === 0 ? 'hidden' : 'visible';
+
+  const vibes = ["🎯 찐텐 측정중","🔍 진짜 나 찾는중","🧠 성향 스캔중","✨ 캐릭터 분석중"];
+  document.getElementById('q-vibe').textContent = vibes[current % vibes.length];
+
+  const optWrap = document.getElementById('q-options');
+  optWrap.innerHTML = '';
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="opt-tag">${idx===0?'A':'B'}</span>${opt.label}`;
+    btn.onclick = () => selectOption(opt.type, btn);
+    optWrap.appendChild(btn);
+  });
+}
+
+function selectOption(type, btnEl){
+  document.querySelectorAll('.option').forEach(b => b.classList.remove('picked'));
+  btnEl.classList.add('picked');
+  answers[current] = type;
+
+  setTimeout(() => {
+    if (current < questions.length - 1){
+      current++;
+      renderQuestion();
+    } else {
+      document.getElementById('progress-fill').style.width = `100%`;
+      setTimeout(computeResult, 350);
+    }
+  }, 260);
+}
+
+function goBack(){
+  if (current > 0){
+    current--;
+    renderQuestion();
+    if (answers[current]) {
+      // re-highlight previously picked
+      setTimeout(() => {
+        const q = questions[current];
+        const opts = document.querySelectorAll('.option');
+        const pickedType = answers[current];
+        q.options.forEach((opt, idx) => {
+          if (opt.type === pickedType) opts[idx].classList.add('picked');
+        });
+      }, 10);
+    }
+  }
+}
+
+function computeResult(){
+  const counts = { E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0 };
+  answers.forEach(a => counts[a]++);
+
+  const type =
+    (counts.E >= counts.I ? 'E' : 'I') +
+    (counts.S >= counts.N ? 'S' : 'N') +
+    (counts.T >= counts.F ? 'T' : 'F') +
+    (counts.J >= counts.P ? 'J' : 'P');
+
+  const data = resultData[type];
+
+  document.getElementById('result-type').textContent = type;
+  document.getElementById('result-nick').textContent = `— ${data.nick} —`;
+  document.getElementById('result-desc').textContent = data.desc;
+
+  const kwWrap = document.getElementById('result-keywords');
+  kwWrap.innerHTML = '';
+  data.keywords.forEach(k => {
+    const span = document.createElement('span');
+    span.className = 'chip';
+    span.textContent = '#' + k;
+    kwWrap.appendChild(span);
+  });
+
+  // trait bars: 3 questions per axis, so max 3
+  const axes = [
+    { key:'EI', left: counts.E, right: counts.I, leftLabel: traitLabels.EI[0], rightLabel: traitLabels.EI[1] },
+    { key:'SN', left: counts.S, right: counts.N, leftLabel: traitLabels.SN[0], rightLabel: traitLabels.SN[1] },
+    { key:'TF', left: counts.T, right: counts.F, leftLabel: traitLabels.TF[0], rightLabel: traitLabels.TF[1] },
+    { key:'JP', left: counts.J, right: counts.P, leftLabel: traitLabels.JP[0], rightLabel: traitLabels.JP[1] },
+  ];
+
+  const barsWrap = document.getElementById('trait-bars');
+  barsWrap.innerHTML = '';
+  axes.forEach(ax => {
+    const total = ax.left + ax.right;
+    const pct = total > 0 ? Math.round((ax.left/total)*100) : 50;
+    const row = document.createElement('div');
+    row.className = 'trait-row';
+    row.innerHTML = `
+      <div class="trait-labels"><span>${ax.leftLabel} ${ax.left}</span><span>${ax.rightLabel} ${ax.right}</span></div>
+      <div class="trait-track"><div class="trait-fill" style="width:${pct}%"></div></div>
+    `;
+    barsWrap.appendChild(row);
+  });
+
+  showScreen('result');
+  setTimeout(() => {
+    document.querySelectorAll('.trait-fill').forEach(el => {
+      el.style.width = el.style.width; // trigger reflow for transition
+    });
+  }, 50);
+}
+
+function restartQuiz(){
+  showScreen('intro');
+}
+
+function shareResult(){
+  const type = document.getElementById('result-type').textContent;
+  const nick = document.getElementById('result-nick').textContent;
+  const text = `나의 찐텐 MBTI는 ${type}! ${nick}\n너도 테스트 해봐 👉`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('결과가 클립보드에 복사됐어요! 친구한테 붙여넣기 ✨');
+    }).catch(() => {
+      alert(text);
+    });
+  } else {
+    alert(text);
+  }
+}
+</script>
+</body>
+</html>
